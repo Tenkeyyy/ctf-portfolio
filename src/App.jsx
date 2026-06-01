@@ -1,4 +1,5 @@
-import React, { useState, useEffect, } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import DarkVeil from './components/DarkVeil';
 import BlogList from './pages/BlogList';
@@ -6,16 +7,8 @@ import BlogPost from './pages/BlogPost';
 import Portfolio from './pages/Portfolio';
 import './App.css';
 
-
-export default function App() {
-	const [page, setPage] = useState('blog'); // 'blog' | 'portfolio' | 'post'
-	const [selectedPost, setSelectedPost] = useState(null);
-
-	const navigate = (target, data = null) => {
-		setPage(target);
-		if (data) setSelectedPost(data);
-		window.scrollTo(0, 0);
-	};
+function Layout() {
+	const location = useLocation();
 
 	return (
 		<div className="app-root">
@@ -23,7 +16,7 @@ export default function App() {
 			<div className="bg-veil">
 				<DarkVeil
 					hueShift={-20}
-					noiseIntensity={0.05}
+					noiseIntensity={0.1}
 					scanlineIntensity={0.15}
 					speed={0.5}
 					scanlineFrequency={29}
@@ -34,20 +27,26 @@ export default function App() {
 
 			{/* Content layer */}
 			<div className="app-content">
-				<Header currentPage={page} navigate={navigate} />
+				<Header />
 
 				<main className="main-wrapper">
-					{page === 'blog' && (
-						<BlogList navigate={navigate} />
-					)}
-					{page === 'post' && selectedPost && (
-						<BlogPost post={selectedPost} navigate={navigate} />
-					)}
-					{page === 'portfolio' && (
-						<Portfolio />
-					)}
+					<Routes>
+						<Route path="/" element={<BlogList />} />
+						<Route path="/writeups/:slug" element={<BlogPost />} />
+						<Route path="/portfolio" element={<Portfolio />} />
+						{/* Catch-all → home */}
+						<Route path="*" element={<BlogList />} />
+					</Routes>
 				</main>
 			</div>
 		</div>
+	);
+}
+
+export default function App() {
+	return (
+		<BrowserRouter>
+			<Layout />
+		</BrowserRouter>
 	);
 }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import BorderGlow from '../components/BorderGlow';
+import { useNavigate } from 'react-router-dom';
 import './BlogList.css';
 import { getPosts, getProfile } from '../data/mockData';
 
+const API = 'http://localhost:3000';
 const CATEGORIES = ['all', 'pwn', 'web', 'crypto', 'rev', 'forensics', 'misc'];
 
 function formatDate(dateStr) {
@@ -62,7 +64,8 @@ function PostCardSkeleton() {
 }
 
 /* ─── Main component ────────────────────────────────────── */
-export default function BlogList({ navigate }) {
+export default function BlogList() {
+	const navigate = useNavigate();
 	const [posts, setPosts] = useState([]);
 	const [profile, setProfile] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -74,8 +77,8 @@ export default function BlogList({ navigate }) {
 		async function fetchData() {
 			try {
 				const [postsRes, profileRes] = await Promise.all([
-					getPosts(),
-					getProfile(),
+					fetch(`${API}/writeups`),
+					fetch(`${API}/profile`),
 				]);
 				if (!postsRes.ok || !profileRes.ok) throw new Error('Server error');
 				const [postsData, profileData] = await Promise.all([
@@ -109,9 +112,7 @@ export default function BlogList({ navigate }) {
 
 			{/* ── Profile Card ──────────────────────────────────────── */}
 			{loading ? (
-				<div className="profile-glow-wrap">
-					<ProfileSkeleton />
-				</div>
+				<div className="profile-glow-wrap"><ProfileSkeleton /></div>
 			) : error ? (
 				<ErrorBanner message={error} />
 			) : profile ? (
@@ -156,9 +157,7 @@ export default function BlogList({ navigate }) {
 			{/* ── Post grid ─────────────────────────────────────────── */}
 			{loading ? (
 				<div className="post-grid">
-					{Array.from({ length: 6 }).map((_, i) => (
-						<PostCardSkeleton key={i} />
-					))}
+					{Array.from({ length: 6 }).map((_, i) => <PostCardSkeleton key={i} />)}
 				</div>
 			) : filtered.length === 0 ? (
 				<div className="empty-state fade-up fade-up-3">
@@ -171,9 +170,9 @@ export default function BlogList({ navigate }) {
 				<div className="post-grid">
 					{filtered.map((post, i) => (
 						<PostCard
-							key={post._id || post.id || post.slug}
+							key={post._id || post.slug}
 							post={post}
-							navigate={navigate}
+							onNavigate={() => navigate(`/writeups/${post.slug}`)}
 							delay={i + 3}
 						/>
 					))}
@@ -196,7 +195,7 @@ function ProfileCard({ profile, postCount }) {
 			className="profile-glow-wrap fade-up fade-up-1"
 		>
 			<div className="profile-card">
-				{/* Left: avatar + status */}
+				{/* Left: avatar + stat pills */}
 				<div className="profile-left">
 					<div className="profile-avatar">
 						{profile.avatar ? (
@@ -204,17 +203,12 @@ function ProfileCard({ profile, postCount }) {
 						) : (
 							<div className="avatar-initials">
 								{(profile.fullName || profile.name || '?')
-									.split(' ')
-									.map(w => w[0])
-									.slice(0, 2)
-									.join('')
-									.toUpperCase()}
+									.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()}
 							</div>
 						)}
 						<span className="avatar-online" title="Open to collabs" />
 					</div>
 
-					{/* Stat pills */}
 					<div className="profile-stat-pills">
 						<div className="stat-pill">
 							<span className="stat-value">{postCount}</span>
@@ -237,7 +231,6 @@ function ProfileCard({ profile, postCount }) {
 
 				{/* Right: info */}
 				<div className="profile-info">
-					{/* Name row */}
 					<div className="profile-name-row">
 						<div>
 							<h1 className="profile-name">{profile.fullName || profile.name}</h1>
@@ -273,10 +266,8 @@ function ProfileCard({ profile, postCount }) {
 						</div>
 					</div>
 
-					{/* Bio */}
 					<p className="profile-bio">{profile.bio}</p>
 
-					{/* Tags / specialties */}
 					{profile.specialties && profile.specialties.length > 0 && (
 						<div className="profile-specialties">
 							{profile.specialties.map(s => (
@@ -290,7 +281,7 @@ function ProfileCard({ profile, postCount }) {
 	);
 }
 
-/* ─── Error banner ──────────────────────────────────────── */
+/* ─── Error Banner ──────────────────────────────────────── */
 function ErrorBanner({ message }) {
 	return (
 		<div className="error-banner">
@@ -303,7 +294,7 @@ function ErrorBanner({ message }) {
 }
 
 /* ─── Post Card ─────────────────────────────────────────── */
-function PostCard({ post, navigate, delay }) {
+function PostCard({ post, onNavigate, delay }) {
 	return (
 		<BorderGlow
 			edgeSensitivity={36}
@@ -314,10 +305,7 @@ function PostCard({ post, navigate, delay }) {
 			colors={['#c084fc', '#f472b6', '#38bdf8']}
 			className={`post-card-wrap fade-up fade-up-${Math.min(delay, 6)}`}
 		>
-			<button
-				className="post-card"
-				onClick={() => navigate('post', post)}
-			>
+			<button className="post-card" onClick={onNavigate}>
 				<div className="post-card-top">
 					<h3 className="post-title">{post.title}</h3>
 					<span className="post-date">{formatDate(post.date)}</span>
@@ -329,9 +317,7 @@ function PostCard({ post, navigate, delay }) {
 						{post.difficulty.charAt(0).toUpperCase() + post.difficulty.slice(1)}
 					</span>
 					<span className="post-ctf">{post.ctf}</span>
-					{post.points && (
-						<span className="post-points">{post.points}pts</span>
-					)}
+					{post.points && <span className="post-points">{post.points}pts</span>}
 				</div>
 			</button>
 		</BorderGlow>

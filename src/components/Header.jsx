@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './Header.css';
 
-export default function Header({ currentPage, navigate }) {
+export default function Header() {
 	const [scrolled, setScrolled] = useState(false);
+	const location = useLocation();
+
+	// Active state helpers
+	const isBlog = location.pathname === '/' || location.pathname.startsWith('/writeups');
+	const isPortfolio = location.pathname === '/portfolio';
 
 	useEffect(() => {
 		const onScroll = () => setScrolled(window.scrollY > 20);
@@ -14,18 +20,18 @@ export default function Header({ currentPage, navigate }) {
 		<header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
 			<div className="header-inner">
 				{/* Logo / Brand */}
-				<button className="header-logo" onClick={() => navigate('blog')}>
+				<Link to="/" className="header-logo">
 					<span className="logo-bracket">[</span>
-					<span className="logo-name">0xT3nk3yyy</span>
+					<span className="logo-name">0xT3nk3yy</span>
 					<span className="logo-bracket">]</span>
 					<span className="logo-cursor">▌</span>
-				</button>
+				</Link>
 
 				{/* Nav */}
 				<nav className="header-nav">
-					<button
-						className={`nav-item ${currentPage === 'blog' || currentPage === 'post' ? 'active' : ''}`}
-						onClick={() => navigate('blog')}
+					<Link
+						to="/"
+						className={`nav-item ${isBlog ? 'active' : ''}`}
 					>
 						<span className="nav-icon">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -37,11 +43,11 @@ export default function Header({ currentPage, navigate }) {
 							</svg>
 						</span>
 						Write-ups
-					</button>
+					</Link>
 
-					<button
-						className={`nav-item ${currentPage === 'portfolio' ? 'active' : ''}`}
-						onClick={() => navigate('portfolio')}
+					<Link
+						to="/portfolio"
+						className={`nav-item ${isPortfolio ? 'active' : ''}`}
 					>
 						<span className="nav-icon">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -51,7 +57,7 @@ export default function Header({ currentPage, navigate }) {
 							</svg>
 						</span>
 						Portfolio
-					</button>
+					</Link>
 				</nav>
 
 				{/* Right side: GitHub link */}

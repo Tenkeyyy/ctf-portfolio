@@ -25,6 +25,7 @@ async function start() {
 	/*
 	  GET ALL WRITEUPS
 	*/
+
 	app.get("/writeups", async (req, res) => {
 		try {
 			const writeups = await postsDB
@@ -40,8 +41,28 @@ async function start() {
 	});
 
 	/*
-	  GET SINGLE PROFILE
+	   GET SINGLE WRITEUP
 	*/
+
+	app.get("/writeups/:slug", async (req, res) => {
+		try {
+			const writeup = await postsDB
+				.collection("Write_ups")
+				.findOne({ slug: req.params.slug });
+
+			if (!writeup) return res.status(404).json({ error: "Not found" });
+			res.json(writeup);
+		} catch (err) {
+			console.error(err);
+			res.status(500).json({ error: "Failed to fetch writeup" });
+		}
+	});
+
+	/*
+	  GET SINGLE PROFILE
+	
+	*/
+
 	app.get("/profile", async (req, res) => {
 		try {
 			const profile = await profileDB
