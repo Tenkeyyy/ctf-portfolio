@@ -157,7 +157,7 @@ export default function Portfolio() {
 						<div className="hero-text-col">
 							<h1 className="hero-name">{profile.fullName || profile.name}</h1>
 							<p className="hero-handle">@{profile.name}</p>
-							<p className="hero-bio">{profile.bio}</p>
+							<p className="hero-bio">{profile.bio2}</p>
 
 							<div className="hero-links">
 								{profile.github && (
